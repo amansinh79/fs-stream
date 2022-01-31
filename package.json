@@ -1,0 +1,24 @@
+{
+  "name": "@solvencino/fs-stream",
+  "version": "1.0.0",
+  "description": "a simple one streamer of files",
+  "main": "index.js",
+  "scripts": {
+    "test": "cd test && node index.js"
+  },
+  "keywords": [
+    "stream",
+    "multistream",
+    "fs"
+  ],
+  "author": "Solvencino",
+  "license": "MIT",
+  "dependencies": {
+    "mkdirp": "^1.0.4",
+    "multistream": "^4.1.0"
+  },
+  "devDependencies": {
+    "dir-compare": "^4.0.0",
+    "tape": "^5.5.0"
+  }
+}
