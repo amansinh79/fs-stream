@@ -2,6 +2,7 @@ const { PassThrough, Transform } = require("stream")
 const MultiStream = require("multistream")
 const fs = require("fs")
 const p = require("path")
+const path = require("path")
 function factory(files, dirname) {
   let count = 0
   return (cb) => {
@@ -31,6 +32,7 @@ function getFiles(dir) {
 }
 
 module.exports = function send(dirname) {
+  dirname = path.join(process.cwd(), dirname)
   const files = getFiles(dirname)
   const stream = new PassThrough()
   stream.write(files[0].split(dirname)[1] + "𐞙")

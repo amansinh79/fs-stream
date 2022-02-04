@@ -14,6 +14,7 @@
   "author": "Solvencino",
   "license": "MIT",
   "dependencies": {
+    "end-of-stream": "^1.4.4",
     "mkdirp": "^1.0.4",
     "multistream": "^4.1.0"
   },

@@ -2,10 +2,13 @@ const { Writable } = require("stream")
 const fs = require("fs")
 const path = require("path")
 const mkdirp = require("mkdirp")
+const eos = require("end-of-stream")
 
 module.exports = function receive(dirname) {
+  dirname = path.join(process.cwd(), dirname)
   let stream
-  return new Writable({
+
+  const rec = new Writable({
     write(chunk, en, cb) {
       if (chunk.toString().includes("𐞙")) {
         const file = chunk.toString().replace("𐞙", "")
@@ -18,8 +21,11 @@ module.exports = function receive(dirname) {
       }
       cb()
     },
-    final(callback) {
-      stream.end(callback)
-    },
   })
+
+  eos(rec, () => {
+    stream.end()
+  })
+
+  return rec
 }
