@@ -32,7 +32,7 @@ function getFiles(dir) {
 }
 
 module.exports = function send(dirname) {
-  dirname = path.join(process.cwd(), dirname)
+  dirname = path.resolve(dirname)
   const files = getFiles(dirname)
   const stream = new PassThrough()
   stream.write(files[0].split(dirname)[1] + "𐞙")

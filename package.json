@@ -1,6 +1,6 @@
 {
   "name": "@solvencino/fs-stream",
-  "version": "1.0.0",
+  "version": "1.0.3",
   "description": "a simple one streamer of files",
   "main": "index.js",
   "scripts": {

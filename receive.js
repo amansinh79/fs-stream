@@ -5,7 +5,7 @@ const mkdirp = require("mkdirp")
 const eos = require("end-of-stream")
 
 module.exports = function receive(dirname) {
-  dirname = path.join(process.cwd(), dirname)
+  dirname = path.resolve(dirname)
   let stream
 
   const rec = new Writable({
