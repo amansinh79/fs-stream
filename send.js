@@ -5,7 +5,9 @@ import p from "path"
 import path from "path"
 import { readableNoopStream } from "noop-stream"
 
-function factory(files, dirname, check, count) {
+let files, count, dirname, check
+
+function factory() {
   return (cb) => {
     if (count === files.length) return cb(null, null)
 
@@ -15,13 +17,9 @@ function factory(files, dirname, check, count) {
       },
       flush(cb) {
         ;(async () => {
-          while (count !== files.length) {
-            if (await check(files[count].split(dirname)[1])) {
-              this.push(files[count].split(dirname)[1] + "𐞙")
-              break
-            } else {
-              count++
-            }
+          const file = await getNextFile()
+          if (file) {
+            this.push(file)
           }
           cb()
         })()
@@ -42,26 +40,33 @@ function getFiles(dir) {
   })
 }
 
-export default async function send(dirname, cb) {
-  dirname = path.resolve(dirname)
-  const files = getFiles(dirname)
-  const stream = new PassThrough()
-  let count = 0,
-    file
-
+async function getNextFile() {
   while (count !== files.length) {
-    if (await cb(files[count].split(dirname)[1])) {
-      file = files[count].split(dirname)[1] + "𐞙"
-      break
+    if (await check(files[count].split(dirname)[1])) {
+      return files[count].split(dirname)[1] + "𐞙"
     } else {
       count++
     }
   }
+  return false
+}
+
+function noopTrue() {
+  return true
+}
+
+export default async function send(dir, cb) {
+  dirname = path.resolve(dir)
+  files = getFiles(dirname)
+  const stream = new PassThrough()
+  count = 0
+  check = cb || noopTrue
+  const file = await getNextFile()
 
   if (file) stream.write(file)
   else return readableNoopStream()
 
-  const filesStream = new MultiStream(factory(files, dirname, cb, count))
+  const filesStream = new MultiStream(factory())
   filesStream.pipe(stream)
   return stream
 }
