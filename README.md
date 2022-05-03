@@ -6,10 +6,22 @@ all of the files are passsed through one stream separeted by "𐞙".
 ### Example
 
 ```
-const { send, receive } = require("@solvencino/fs-stream")
+import { send, receive } from "@solvencino/fs-stream"
+import { pipeline } from "stream/promises"
 
-send("files").pipe(receive("copied"))
+await pipeline(
+    await send("files", async (file) => {
+      const res = !fs.existsSync(path.join("copied", file))
+      if (res) {
+        console.log(file)
+      }
+      return res
+    }),
+    receive("copied")
+  )
 ```
+
+"send" can have second argument callback function which receives filepath as argument, you can return false to skip the file.
 
 ### Limits
 

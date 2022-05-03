@@ -1,4 +1,4 @@
-const send = require("./send")
-const receive = require("./receive")
+import send from "./send.js"
+import receive from "./receive.js"
 
-module.exports = { send, receive }
+export { send, receive }

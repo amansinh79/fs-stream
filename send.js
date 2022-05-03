@@ -1,10 +1,11 @@
-const { PassThrough, Transform } = require("stream")
-const MultiStream = require("multistream")
-const fs = require("fs")
-const p = require("path")
-const path = require("path")
-function factory(files, dirname) {
-  let count = 0
+import { PassThrough, Transform } from "stream"
+import MultiStream from "multistream"
+import fs from "fs"
+import p from "path"
+import path from "path"
+import { readableNoopStream } from "noop-stream"
+
+function factory(files, dirname, check, count) {
   return (cb) => {
     if (count === files.length) return cb(null, null)
 
@@ -13,10 +14,20 @@ function factory(files, dirname) {
         callback(null, chunk)
       },
       flush(cb) {
-        if (count !== files.length) this.push(files[count].split(dirname)[1] + "𐞙")
-        cb()
+        ;(async () => {
+          while (count !== files.length) {
+            if (await check(files[count].split(dirname)[1])) {
+              this.push(files[count].split(dirname)[1] + "𐞙")
+              break
+            } else {
+              count++
+            }
+          }
+          cb()
+        })()
       },
     })
+
     cb(null, fs.createReadStream(files[count++]).pipe(appendTransform))
   }
 }
@@ -31,12 +42,26 @@ function getFiles(dir) {
   })
 }
 
-module.exports = function send(dirname) {
+export default async function send(dirname, cb) {
   dirname = path.resolve(dirname)
   const files = getFiles(dirname)
   const stream = new PassThrough()
-  stream.write(files[0].split(dirname)[1] + "𐞙")
-  const filesStream = new MultiStream(factory(files, dirname))
+  let count = 0,
+    file
+
+  while (count !== files.length) {
+    if (await cb(files[count].split(dirname)[1])) {
+      file = files[count].split(dirname)[1] + "𐞙"
+      break
+    } else {
+      count++
+    }
+  }
+
+  if (file) stream.write(file)
+  else return readableNoopStream()
+
+  const filesStream = new MultiStream(factory(files, dirname, cb, count))
   filesStream.pipe(stream)
   return stream
 }

@@ -1,10 +1,10 @@
-const { Writable } = require("stream")
-const fs = require("fs")
-const path = require("path")
-const mkdirp = require("mkdirp")
-const eos = require("end-of-stream")
+import { Writable } from "stream"
+import fs from "fs"
+import path from "path"
+import mkdirp from "mkdirp"
+import eos from "end-of-stream"
 
-module.exports = function receive(dirname) {
+export default function receive(dirname) {
   dirname = path.resolve(dirname)
   let stream
 
@@ -24,7 +24,7 @@ module.exports = function receive(dirname) {
   })
 
   eos(rec, () => {
-    stream.end()
+    if (stream) stream.end()
   })
 
   return rec

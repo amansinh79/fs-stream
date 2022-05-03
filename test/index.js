@@ -1,8 +1,9 @@
-const { send, receive } = require("..")
-const dircompare = require("dir-compare")
-const test = require("tape")
-const { pipeline } = require("stream/promises")
-const fs = require("fs")
+import { send, receive } from "../index.js"
+import dircompare from "dir-compare"
+import test from "tape"
+import { pipeline } from "stream/promises"
+import fs from "fs"
+import path from "path"
 
 test("copy", async (t) => {
   if (fs.existsSync("copied")) {
@@ -10,7 +11,16 @@ test("copy", async (t) => {
       recursive: true,
     })
   }
-  await pipeline(send("files"), receive("copied"))
+  await pipeline(
+    await send("files", async (file) => {
+      const res = !fs.existsSync(path.join("copied", file))
+      if (res) {
+        console.log(file)
+      }
+      return res
+    }),
+    receive("copied")
+  )
   const res = dircompare.compareSync("files", "copied")
-  t.true(res.same)
+  t.true(res.same, "both dirs contain same content")
 })
