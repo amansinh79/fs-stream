@@ -21,7 +21,8 @@ await pipeline(
   )
 ```
 
-"send" can have second argument callback function which receives filepath as argument, you can return false to skip the file.
+- "files" and "copied" are directory names.
+- "send" can have second argument callback function which receives filepath as argument, you can return false to skip the file.
 
 ### Limits
 
