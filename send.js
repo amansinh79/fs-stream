@@ -1,7 +1,6 @@
 import { PassThrough, Transform } from "stream"
 import MultiStream from "multistream"
 import fs from "fs"
-import p from "path"
 import path from "path"
 import { readableNoopStream } from "noop-stream"
 
@@ -30,16 +29,6 @@ function factory() {
   }
 }
 
-function getFiles(dir) {
-  return fs.readdirSync(dir).flatMap((item) => {
-    const path = `${dir}${p.sep}${item}`
-    if (fs.statSync(path).isDirectory()) {
-      return getFiles(path)
-    }
-    return path
-  })
-}
-
 async function getNextFile() {
   while (count !== files.length) {
     if (await check(files[count].split(dirname)[1])) {
@@ -55,10 +44,11 @@ function noopTrue() {
   return true
 }
 
-export default async function send(dir, cb) {
+export default async function send(dir, fileList, cb) {
   dirname = path.resolve(dir)
-  files = getFiles(dirname)
+  files = fileList
   const stream = new PassThrough()
+
   count = 0
   check = cb || noopTrue
   const file = await getNextFile()
