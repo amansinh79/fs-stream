@@ -3,6 +3,8 @@ import fs from "fs"
 import path from "path"
 import mkdirp from "mkdirp"
 import eos from "end-of-stream"
+import { deserialize } from "v8"
+import types from "./types.js"
 
 export default function receive(dirname) {
   dirname = path.resolve(dirname)
@@ -10,14 +12,15 @@ export default function receive(dirname) {
 
   const rec = new Writable({
     write(chunk, en, cb) {
-      if (chunk.toString().includes("𐞙")) {
-        const file = chunk.toString().replace("𐞙", "")
+      chunk = deserialize(chunk)
+      if (chunk.type === types.NAME) {
+        const file = chunk.payload.toString()
         const p = path.dirname(file)
         mkdirp.sync(path.join(dirname, p))
         if (stream) stream.end()
         stream = fs.createWriteStream(path.join(dirname, file))
       } else {
-        stream.write(chunk)
+        stream.write(chunk.payload)
       }
       cb()
     },

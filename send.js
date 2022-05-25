@@ -3,6 +3,8 @@ import MultiStream from "multistream"
 import fs from "fs"
 import path from "path"
 import { readableNoopStream } from "noop-stream"
+import { serialize } from "v8"
+import types from "./types.js"
 
 let files, count, dirname, check
 
@@ -12,7 +14,7 @@ function factory() {
 
     const appendTransform = new Transform({
       transform(chunk, encoding, callback) {
-        callback(null, chunk)
+        callback(null, serialize({ type: types.DATA, payload: chunk }))
       },
       flush(cb) {
         ;(async () => {
@@ -32,7 +34,7 @@ function factory() {
 async function getNextFile() {
   while (count !== files.length) {
     if (await check(files[count].split(dirname)[1])) {
-      return files[count].split(dirname)[1] + "𐞙"
+      return serialize({ type: types.NAME, payload: files[count].split(dirname)[1] })
     } else {
       count++
     }
@@ -46,7 +48,7 @@ function noopTrue() {
 
 export default async function send(dir, fileList, cb) {
   dirname = path.resolve(dir)
-  files = fileList
+  files = fileList || []
   const stream = new PassThrough()
 
   count = 0
